@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "GitHub Search",
+  "name_for_model": "GitHubSearch",
+  "description_for_human": "Plugin for searching GitHub repositories, You can search the repository by entering your search query.",
+  "description_for_model": "Plugin for searching GitHub repositories, You can search the repository by entering your search query.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://chatgpt.mamezou-tech.com/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "logo_url": "https://chatgpt.mamezou-tech.com/logo.png",
+  "contact_email": "support@chatgpt.mamezou-tech.com",
+  "legal_info_url": "https://chatgpt.mamezou-tech.com/legal"
+}

@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: GitHubSearchPlugin
+  description: A Plugin to search GitHub repositories, You can search the repository by entering your search query.
+  version: 'v1'
+servers:
+  - url: https://chatgpt.mamezou-tech.com
+paths:
+  /api/search:
+    get:
+      operationId: searchRepos
+      summary: Search GitHub Repositories by specified query.
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          required: true
+          description: The Search query for GitHub repositories.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchReposResponse'
+components:
+  schemas:
+    SearchReposResponse:
+      type: object
+      properties:
+        repos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Repo'
+          description: The list of GitHub repositories.
+    Repo:
+      type: object
+      properties:
+        full_name:
+          type: string
+          description: The name of GitHub Repository owner.
+        url:
+          type: string
+          description: The URL of GitHub Repository.
+        star:
+          type: integer
+          description: Number of stars collected by the GitHub repository.
+        description:
+          type: string
+          description: The description of the GitHub repository.
