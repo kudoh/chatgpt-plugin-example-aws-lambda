@@ -13,6 +13,6 @@
     "is_user_authenticated": false
   },
   "logo_url": "http://localhost:3000/logo.png",
-  "contact_email": "noboru.kudoh@gmail.com",
+  "contact_email": "example@gmail.com",
   "legal_info_url": "http://localhost:3000/legal"
 }

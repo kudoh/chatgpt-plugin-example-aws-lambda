@@ -42,7 +42,7 @@ export class CdkStack extends cdk.Stack {
       description: 'ChatGPT Plugin for GitHub Search'
     });
     const resource = api.root.addResource('api').addResource('search', {
-      defaultCorsPreflightOptions: preflightOptions
+      defaultCorsPreflightOptions: stage === "local" ? preflightOptions : undefined
     });
     resource.addMethod('GET', new apigateway.LambdaIntegration(githubSearchFunction));
 
@@ -69,7 +69,7 @@ export class CdkStack extends cdk.Stack {
         }
       });
       api.root.addResource('openapi.yaml', {
-        defaultCorsPreflightOptions: preflightOptions
+        defaultCorsPreflightOptions: stage === "local" ? preflightOptions : undefined
       }).addMethod('GET', new apigateway.LambdaIntegration(openapi));
       const aiplugin = new nodejs.NodejsFunction(this, 'AIPlugin', {
         functionName: 'aiplugin',
@@ -81,22 +81,13 @@ export class CdkStack extends cdk.Stack {
         }
       });
       api.root.addResource('.well-known').addResource('ai-plugin.json', {
-        defaultCorsPreflightOptions: preflightOptions
+        defaultCorsPreflightOptions: stage === "local" ? preflightOptions : undefined
       }).addMethod('GET', new apigateway.LambdaIntegration(aiplugin));
     } else if (stage === 'aws') {
       const bucket = new s3.Bucket(this, 'StaticBucket', {
         bucketName: `${this.stackName}-static-resource`,
         accessControl: s3.BucketAccessControl.PRIVATE,
         objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
-        cors: [
-          {
-            allowedMethods: [
-              s3.HttpMethods.GET
-            ],
-            allowedOrigins: ['https://chat.openai.com'],
-            allowedHeaders: ['*']
-          }
-        ],
         autoDeleteObjects: true,
         removalPolicy: RemovalPolicy.DESTROY,
       });
@@ -127,7 +118,7 @@ export class CdkStack extends cdk.Stack {
         defaultBehavior: {
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-          responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
+          // responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           origin: new origins.S3Origin(bucket, {
             originAccessIdentity: oai
@@ -139,7 +130,7 @@ export class CdkStack extends cdk.Stack {
             origin: new origins.RestApiOrigin(api),
             cachePolicy: apiCachePolicy,
             allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-            responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
+            // responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
             viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
           }
         }
