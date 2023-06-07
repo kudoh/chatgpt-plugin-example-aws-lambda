@@ -33,7 +33,8 @@ export class CdkStack extends cdk.Stack {
       memorySize: 256,
       runtime: lambda.Runtime.NODEJS_18_X,
       environment: {
-        GITHUB_TOKEN: this.node.getContext('github-token') // for testing
+        // ChatGPTが取得するOAuthのアクセストークンを使用するので不要
+        // GITHUB_TOKEN: this.node.getContext('github-token')
       }
     });
 
@@ -105,7 +106,7 @@ export class CdkStack extends cdk.Stack {
       const apiCachePolicy = new cloudfront.CachePolicy(this, 'ChatGPTGitHubSearchCachePolicy', {
         cachePolicyName: `${this.stackName}-api-policy`,
         queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-        headerBehavior: cloudfront.CacheHeaderBehavior.none(),
+        headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Authorization'), // AuthorizationをLambdaに渡す
         cookieBehavior: cloudfront.CacheCookieBehavior.none()
       });
       const domainName = this.node.getContext('domain');
@@ -118,7 +119,6 @@ export class CdkStack extends cdk.Stack {
         defaultBehavior: {
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-          // responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           origin: new origins.S3Origin(bucket, {
             originAccessIdentity: oai
@@ -130,7 +130,6 @@ export class CdkStack extends cdk.Stack {
             origin: new origins.RestApiOrigin(api),
             cachePolicy: apiCachePolicy,
             allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-            // responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
             viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
           }
         }

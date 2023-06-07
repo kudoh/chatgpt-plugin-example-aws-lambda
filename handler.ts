@@ -1,4 +1,4 @@
-import { APIGatewayEvent, APIGatewayProxyHandler, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyHandler, Context } from 'aws-lambda';
 import { Octokit } from 'octokit';
 
 const CORSHeaders = {
@@ -16,16 +16,20 @@ type Repo = {
 }
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN
+  // ユーザーアクセストークンを使用するため不要
+  // auth: process.env.GITHUB_TOKEN
 });
 export const search: APIGatewayProxyHandler = async (event: APIGatewayEvent, context: Context) => {
   const { q } = event.queryStringParameters ?? {};
-  console.log('param', q);
   const resp = await octokit.request('GET /search/repositories', {
     q,
     sort: 'stars',
     order: 'desc',
-    per_page: 5
+    per_page: 5,
+    // ChatGPTが取得するGitHubアクセストークン(Bearer ghu_xxxxxxx)をそのまま指定
+    headers: {
+      authorization: event.headers.Authorization
+    }
   });
   const repos: Repo[] = resp.data.items.map(item => ({
     full_name: item.full_name,
